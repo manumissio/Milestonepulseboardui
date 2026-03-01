@@ -32,17 +32,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. Install Node.js
+# 1. Install Node.js (Cache removed)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      # 2. Install dependencies and build the Vite project
+      # 2. Install dependencies (Using install instead of ci)
       - name: Install and Build
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Setup Pages
