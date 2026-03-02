@@ -41,4 +41,6 @@ export const router = createBrowserRouter([
     path: "/integrations",
     Component: IntegrationsScreen,
   },
-]);
+], {
+  basename: import.meta.env.BASE_URL,
+});
