@@ -1,4 +1,5 @@
 import { Calendar, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router';
 
 interface Milestone {
   id: string;
@@ -82,63 +83,76 @@ interface MilestoneCardsProps {
 }
 
 export function MilestoneCards({ selectedMilestone, onSelectMilestone }: MilestoneCardsProps) {
+  const navigate = useNavigate();
+  
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {milestones.map((milestone) => {
-        const config = statusConfig[milestone.status];
-        const isSelected = selectedMilestone === milestone.id;
-        
-        return (
-          <button
-            key={milestone.id}
-            onClick={() => onSelectMilestone(isSelected ? null : milestone.id)}
-            className={`bg-white border-2 rounded-lg p-4 text-left transition-all hover:shadow-md ${
-              isSelected ? 'border-blue-500 shadow-md' : 'border-gray-200'
-            }`}
-          >
-            {/* Status Badge */}
-            <div className="flex items-center justify-between mb-3">
-              <span className={`px-2 py-1 rounded text-xs ${config.badgeBg} ${config.badgeText}`}>
-                {config.label}
-              </span>
-              {milestone.openRisks > 0 && (
-                <div className="flex items-center gap-1 text-orange-600">
-                  <AlertTriangle className="w-3 h-3" />
-                  <span className="text-xs">{milestone.openRisks}</span>
+    <div>
+      {/* Grid of 4 Milestone Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        {milestones.map((milestone) => {
+          const config = statusConfig[milestone.status];
+          const isSelected = selectedMilestone === milestone.id;
+          
+          return (
+            <button
+              key={milestone.id}
+              onClick={(e) => {
+                // If shift or ctrl key, just filter the dashboard
+                if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                  onSelectMilestone(isSelected ? null : milestone.id);
+                } else {
+                  // Otherwise navigate to detail view
+                  navigate(`/milestone/${milestone.id}`);
+                }
+              }}
+              className={`bg-white border-2 rounded-lg p-4 text-left transition-all hover:shadow-md w-full ${
+                isSelected ? 'border-blue-500 shadow-md' : 'border-gray-200'
+              }`}
+            >
+              {/* Status Badge and Risks */}
+              <div className="flex items-center justify-between mb-3">
+                <span className={`px-2 py-1 rounded text-xs font-medium ${config.badgeBg} ${config.badgeText}`}>
+                  {config.label}
+                </span>
+                {milestone.openRisks > 0 && (
+                  <div className="flex items-center gap-1 text-orange-600">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-sm font-medium">{milestone.openRisks}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Milestone Name */}
+              <h3 className="text-base font-medium text-gray-900 mb-4">{milestone.name}</h3>
+
+              {/* Progress Bar */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-600">Progress</span>
+                  <span className="text-sm font-medium text-gray-900">{milestone.percentComplete}%</span>
                 </div>
-              )}
-            </div>
-
-            {/* Milestone Name */}
-            <h3 className="text-gray-900 mb-3">{milestone.name}</h3>
-
-            {/* Progress Bar */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-gray-500">Progress</span>
-                <span className="text-xs text-gray-700">{milestone.percentComplete}%</span>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all"
+                    style={{ width: `${milestone.percentComplete}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${milestone.percentComplete}%` }}
-                />
-              </div>
-            </div>
 
-            {/* Forecast */}
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1 text-gray-500">
-                <Calendar className="w-3 h-3" />
-                <span>{milestone.targetDate}</span>
+              {/* Target Date and Forecast */}
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Calendar className="w-4 h-4" />
+                  <span>{milestone.targetDate}</span>
+                </div>
+                <span className={`font-medium ${milestone.forecastDelta === 'On schedule' ? 'text-green-600' : 'text-orange-600'}`}>
+                  {milestone.forecastDelta}
+                </span>
               </div>
-              <span className={milestone.forecastDelta === 'On schedule' ? 'text-green-600' : 'text-orange-600'}>
-                {milestone.forecastDelta}
-              </span>
-            </div>
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
